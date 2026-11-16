@@ -16,13 +16,13 @@ ZKTeco's desktop software (ZKTime / ZKAccess) stores every punch it downloads fr
 
 ## Tech stack
 
-Java 17 · Spring Boot 3.5 · Spring JDBC · MySQL · UCanAccess (MS Access JDBC driver) · JUnit 5 + H2 for tests
+Java 25 (LTS) · Spring Boot 4.1 (Spring Framework 7, Jackson 3, Tomcat 11) · Spring JDBC · MySQL Connector/J 26.10 · UCanAccess 5.3 (MS Access JDBC driver) · JUnit + H2 for tests · Maven 3.9 (wrapper included)
 
 ## Getting started
 
 ### Prerequisites
 
-- JDK 17 or newer
+- JDK 25 or newer
 - MySQL 8 (or MariaDB)
 - Read access to the ZKTeco `ATT2000.MDB` file (on the same machine or a mapped network drive)
 
@@ -122,3 +122,7 @@ The integration tests run against an in-memory H2 database in MySQL mode, with t
 ## Acknowledgements
 
 This project was inspired by [RumiAust/Zkteco-Attendance-Management-System](https://github.com/RumiAust/Zkteco-Attendance-Management-System).
+
+## License
+
+Released under the [MIT License](LICENSE).
