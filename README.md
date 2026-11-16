@@ -1,6 +1,6 @@
 # Attendance Management System
 
-A Spring Boot service that syncs punch records from **ZKTeco biometric attendance devices** into **PostgreSQL** and serves them through a REST API. It is designed to run on **Render** with a **Neon** serverless Postgres database.
+A Spring Boot service that syncs punch records from **ZKTeco biometric attendance devices** into **PostgreSQL** and serves them through a web dashboard and a REST API. It is designed to run on **Render** with a **Neon** serverless Postgres database.
 
 ZKTeco's desktop software (ZKTime / ZKAccess) stores every punch it downloads from the devices in an MS Access database, usually `ATT2000.MDB`. This service reads that file on a schedule, copies new punches into PostgreSQL, and gives other systems (HR, payroll, dashboards) a clean API to work with.
 
@@ -27,6 +27,7 @@ The same jar runs in both places. The `.mdb` file only exists on the office PC, 
 - **Sync history**: failed runs, and runs that copied records, are logged with counts and error messages.
 - **Manual trigger**: start a sync on demand over the API. Overlapping runs are rejected.
 - **Daily summary**: first-in / last-out and worked minutes per employee per day.
+- **Web dashboard** at the root URL: sync status, the daily summary, raw punches, sync history and CSV export.
 - **API key protection** for every `/api/**` endpoint. The health check stays open for the hosting platform.
 - **Configurable through environment variables**: no credentials in source.
 
@@ -61,6 +62,8 @@ The tables are created automatically on first start from [`schema.sql`](src/main
    curl https://<your-service>.onrender.com/actuator/health
    curl -H "X-API-Key: <API_KEY>" https://<your-service>.onrender.com/api/sync/status
    ```
+
+5. Open `https://<your-service>.onrender.com/` in a browser and enter the `API_KEY` to see the dashboard.
 
 On the free plan the service sleeps after about 15 minutes without traffic. The first request after that takes around a minute while it wakes up.
 
@@ -106,12 +109,25 @@ $env:ZKTECO_MDB_PATH = "D:/ZKTeco/ATT2000.MDB"
 .\mvnw.cmd spring-boot:run
 ```
 
-Or with Docker (API only):
+Then open http://localhost:9010/. Without `API_KEY` set, the dashboard opens with no sign-in.
+
+Or with Docker (dashboard and API, no sync):
 
 ```bash
 docker build -t attendance-management-system .
 docker run -p 9010:9010 -e DB_URL=... -e DB_USERNAME=... -e DB_PASSWORD=... attendance-management-system
 ```
+
+## Web dashboard
+
+Open the service's root URL (`/`) in a browser. If the server has an `API_KEY`, the page asks for it once and keeps it in that browser's local storage. It shows:
+
+- total punches stored, the last synced device record and the result of the last sync
+- **Daily summary**: first in, last out and hours worked per employee per day
+- **Punches**: every raw punch, 100 per page
+- **Sync history**: recent sync runs and any error messages
+
+The summary and punches tables can be filtered by date range and employee ID and exported as CSV. The page is a single static file, [`index.html`](src/main/resources/static/index.html), with no build step.
 
 ## REST API
 
@@ -160,6 +176,11 @@ src/main/java/com/abhishek/attendance
 ├── service/      # Sync logic and attendance queries
 ├── scheduler/    # Cron-triggered sync
 └── web/          # REST controllers and error handling
+
+src/main/resources
+├── static/index.html        # Web dashboard
+├── schema.sql               # Tables, created on startup
+└── application.properties   # Settings, all overridable by environment variables
 ```
 
 ## Testing

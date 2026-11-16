@@ -24,11 +24,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -123,6 +126,14 @@ class SyncIntegrationTest {
         mvc.perform(get("/api/attendance")).andExpect(status().isUnauthorized());
         mvc.perform(get("/api/attendance").header("X-API-Key", "wrong")).andExpect(status().isUnauthorized());
         mvc.perform(get("/actuator/health")).andExpect(status().isOk());
+    }
+
+    @Test
+    void servesDashboardAtRootWithoutApiKey() throws Exception {
+        mvc.perform(get("/")).andExpect(status().isOk()).andExpect(forwardedUrl("index.html"));
+        mvc.perform(get("/index.html"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Attendance Dashboard")));
     }
 
     private static MockHttpServletRequestBuilder api(MockHttpServletRequestBuilder request) {
