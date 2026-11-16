@@ -14,7 +14,7 @@
     <artifactId>attendance-management-system</artifactId>
     <version>1.0.0</version>
     <name>Attendance Management System</name>
-    <description>Syncs punch records from ZKTeco biometric devices into MySQL and exposes them over a REST API</description>
+    <description>Syncs punch records from ZKTeco biometric devices into PostgreSQL and exposes them over a REST API</description>
 
     <properties>
         <java.version>25</java.version>
