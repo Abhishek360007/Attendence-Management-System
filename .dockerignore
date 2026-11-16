@@ -1,0 +1,10 @@
+target/
+out/
+.git/
+.github/
+.idea/
+.vscode/
+*.iml
+*.mdb
+*.accdb
+.env

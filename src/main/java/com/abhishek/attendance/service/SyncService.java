@@ -50,6 +50,9 @@ public class SyncService {
      * Runs one sync pass. Concurrent calls (scheduler + manual trigger) are rejected rather than queued.
      */
     public SyncRun sync() {
+        if (!properties.sync().enabled()) {
+            throw new SyncDisabledException();
+        }
         if (!lock.tryLock()) {
             throw new SyncInProgressException();
         }
@@ -92,6 +95,12 @@ public class SyncService {
             syncRunRepository.save(run);
         }
         return run;
+    }
+
+    public static class SyncDisabledException extends RuntimeException {
+        public SyncDisabledException() {
+            super("Sync is disabled on this instance (SYNC_ENABLED=false). Run sync on the machine that has the ZKTeco database.");
+        }
     }
 
     public static class SyncInProgressException extends RuntimeException {

@@ -45,9 +45,10 @@ public class AttendanceRepository {
             return 0;
         }
         String sql = """
-                INSERT IGNORE INTO attendance_record
+                INSERT INTO attendance_record
                     (employee_id, employee_name, check_time, check_type, device_id, source_id)
                 VALUES (?, ?, ?, ?, ?, ?)
+                ON CONFLICT (source_id) DO NOTHING
                 """;
         int[][] results = jdbc.batchUpdate(sql, records, 500, (ps, r) -> {
             ps.setString(1, r.employeeId());

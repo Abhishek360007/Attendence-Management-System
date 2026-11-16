@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: attendance-management-system
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /actuator/health
+    envVars:
+      # Neon connection, e.g. jdbc:postgresql://ep-xxxx-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      # Clients must send this as the X-API-Key header. Render generates a random value.
+      - key: API_KEY
+        generateValue: true
+      - key: SYNC_ENABLED
+        value: "false"

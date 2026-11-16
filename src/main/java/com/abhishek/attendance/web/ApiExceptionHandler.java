@@ -18,6 +18,11 @@ public class ApiExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
+    @ExceptionHandler(SyncService.SyncDisabledException.class)
+    public ProblemDetail disabled(SyncService.SyncDisabledException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
+    }
+
     @ExceptionHandler(SyncService.SyncInProgressException.class)
     public ProblemDetail conflict(SyncService.SyncInProgressException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());

@@ -1,24 +1,24 @@
 CREATE TABLE IF NOT EXISTS attendance_record (
-    id            BIGINT       NOT NULL AUTO_INCREMENT,
+    id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     employee_id   VARCHAR(64)  NOT NULL,
     employee_name VARCHAR(128),
     check_time    TIMESTAMP    NOT NULL,
     check_type    VARCHAR(8),
-    device_id     INT,
+    device_id     INTEGER,
     source_id     BIGINT       NOT NULL,
     created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (id),
-    UNIQUE KEY uk_attendance_source (source_id),
-    INDEX idx_attendance_employee_time (employee_id, check_time)
+    CONSTRAINT uk_attendance_source UNIQUE (source_id)
 );
 
+CREATE INDEX IF NOT EXISTS idx_attendance_employee_time ON attendance_record (employee_id, check_time);
+CREATE INDEX IF NOT EXISTS idx_attendance_check_time ON attendance_record (check_time);
+
 CREATE TABLE IF NOT EXISTS sync_run (
-    id             BIGINT      NOT NULL AUTO_INCREMENT,
-    started_at     TIMESTAMP   NOT NULL,
-    finished_at    TIMESTAMP   NULL,
-    last_source_id BIGINT      NOT NULL,
-    records_synced INT         NOT NULL DEFAULT 0,
-    status         VARCHAR(16) NOT NULL,
-    message        VARCHAR(512),
-    PRIMARY KEY (id)
+    id             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    started_at     TIMESTAMP    NOT NULL,
+    finished_at    TIMESTAMP,
+    last_source_id BIGINT       NOT NULL,
+    records_synced INTEGER      NOT NULL DEFAULT 0,
+    status         VARCHAR(16)  NOT NULL,
+    message        VARCHAR(512)
 );
