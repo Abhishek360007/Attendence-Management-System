@@ -10,7 +10,7 @@
 
 ![Dashboard](docs/screenshots/01-dashboard.png)
 
-**Contents:** [Screenshots](#screenshots) · [Features](#features) · [Architecture](#architecture) · [Deploying](#deploying) · [Roles](#roles) · [How things are calculated](#how-things-are-calculated) · [Configuration](#configuration) · [REST API](#rest-api) · [Testing](#testing)
+**Contents:** [Screenshots](#screenshots) · [Features](#features) · [Quick start](#quick-start) · [Architecture](#architecture) · [Deploying](#deploying) · [Roles](#roles) · [How things are calculated](#how-things-are-calculated) · [Configuration](#configuration) · [REST API](#rest-api) · [Testing](#testing)
 
 An attendance, leave and payroll system for companies using **ZKTeco biometric devices**. It syncs punches from the devices into **PostgreSQL**, works out who was present, late, absent or on leave, and gives HR, managers and employees a web dashboard and a REST API. It is designed to run on **Render** with a **Neon** serverless Postgres database.
 
@@ -109,6 +109,16 @@ Both can also run the scheduled notification jobs. Each job claims its period in
 - **Frontend:** a vanilla JavaScript dashboard with no build step
 - **Tests:** JUnit and Testcontainers
 - **Deployment:** Docker on Render, built with Maven 3.9 (wrapper included)
+
+## Quick start
+
+Once it is deployed (steps below), set it up like this:
+
+1. Open the site and create the first admin account. You need the `API_KEY` from Render once.
+2. **Settings:** enter the company name and time zone.
+3. **Departments & schedules:** add working hours, departments and holidays.
+4. **Employees:** add everyone with their device user ID, then create sign-ins.
+5. Install the sync agent on the office PC. Punches start arriving within a minute.
 
 ## Deploying
 
@@ -300,6 +310,8 @@ Docker must be running to run them.
 ## Acknowledgements
 
 This project was inspired by [RumiAust/Zkteco-Attendance-Management-System](https://github.com/RumiAust/Zkteco-Attendance-Management-System).
+
+The dashboard uses the [Inter](https://rsms.me/inter/) typeface by Rasmus Andersson, licensed under the [SIL Open Font License 1.1](src/main/resources/static/assets/fonts/OFL.txt).
 
 ## License
 
