@@ -69,20 +69,26 @@ On the free plan the service sleeps after about 15 minutes without traffic. The 
 
 ### 3. Run the sync agent on the office PC
 
-On the Windows PC that runs ZKTime / ZKAccess, with JDK 25 installed:
+On the Windows PC that runs ZKTime / ZKAccess, copy or clone this repository, open PowerShell in its `agent` folder, and run [`install-agent.ps1`](agent/install-agent.ps1). It installs Java 25 with winget if needed, builds the jar, and installs a Windows service that starts with Windows and restarts itself after a crash.
+
+**1. Find the database file.** ZKTime / ZKAccess keeps it in its install folder, usually as `att2000.mdb`, for example `C:\Program Files (x86)\ZKTeco\att2000.mdb`.
+
+**2. Check your settings** (no Administrator needed, installs nothing). This runs one sync and reports the result. You are asked for the database password.
 
 ```powershell
-.\mvnw.cmd -DskipTests package
-
-$env:DB_URL          = "jdbc:postgresql://<neon-host>/<database>?sslmode=require"
-$env:DB_USERNAME     = "<neon-user>"
-$env:DB_PASSWORD     = "<neon-password>"
-$env:ZKTECO_MDB_PATH = "C:/ZKTeco/ATT2000.MDB"
-$env:SYNC_ENABLED    = "true"
-java -jar target\attendance-management-system.jar
+Set-ExecutionPolicy -Scope Process Bypass
+.\install-agent.ps1 -MdbPath "C:\Program Files (x86)\ZKTeco\att2000.mdb" `
+    -DbUrl "jdbc:postgresql://<neon-host>/<database>?sslmode=require" `
+    -DbUsername "<neon-user>" -TestOnly
 ```
 
-To keep it running in the background and starting with Windows, register that command as a service with a wrapper such as [WinSW](https://github.com/winsw/winsw) or [NSSM](https://nssm.cc).
+**3. Install the service.** Run the same command without `-TestOnly` in an Administrator PowerShell.
+
+The service is called **Attendance Sync Agent** (`AttendanceAgent`) and lives in `C:\AttendanceAgent`, which only Administrators can read because its configuration holds the database password. Logs are in `C:\AttendanceAgent\logs`, and the agent's own dashboard is at http://127.0.0.1:9010/ on that PC only. To update the agent, pull the latest code, delete `target\`, and run the installer again. To remove it, run `.\uninstall-agent.ps1` as Administrator.
+
+If the `.mdb` file is on another computer, use its UNC path (`\\PC-NAME\share\att2000.mdb`, not a mapped drive letter) and add `-ServiceAccount (Get-Credential)` with a Windows account that can read that share.
+
+The agent reads `CHECKINOUT.Auto_increment` to know which punches are new. If your ZKTeco database has no such column, the first sync fails with an error naming it. Open an issue with your table's columns.
 
 ## Configuration
 
@@ -176,6 +182,10 @@ src/main/java/com/abhishek/attendance
 ├── service/      # Sync logic and attendance queries
 ├── scheduler/    # Cron-triggered sync
 └── web/          # REST controllers and error handling
+
+agent/
+├── install-agent.ps1     # Installs the sync agent as a Windows service on the ZKTeco PC
+└── uninstall-agent.ps1   # Removes it
 
 src/main/resources
 ├── static/index.html        # Web dashboard
