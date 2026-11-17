@@ -88,7 +88,7 @@ The service is called **Attendance Sync Agent** (`AttendanceAgent`) and lives in
 
 If the `.mdb` file is on another computer, use its UNC path (`\\PC-NAME\share\att2000.mdb`, not a mapped drive letter) and add `-ServiceAccount (Get-Credential)` with a Windows account that can read that share.
 
-The agent reads `CHECKINOUT.Auto_increment` to know which punches are new. If your ZKTeco database has no such column, the first sync fails with an error naming it. Open an issue with your table's columns.
+The agent detects the database layout on first sync and logs it. If `CHECKINOUT` has an `Auto_increment` column, new punches are found by that number. Otherwise (the standard ZKTime layout) they are found by `CHECKTIME`, and the last 7 days are re-read on every run to catch punches that ZKTime downloads from devices late. Change the window with the `SYNC_LOOKBACK_DAYS` environment variable.
 
 ## Configuration
 
@@ -103,6 +103,7 @@ The agent reads `CHECKINOUT.Auto_increment` to know which punches are new. If yo
 | `SYNC_ENABLED` | Run the scheduled sync (`false` on cloud instances) | `true` (the Docker image sets `false`) |
 | `SYNC_CRON` | Sync schedule (Spring cron, 6 fields) | `0 */1 * * * *` (every minute) |
 | `SYNC_BATCH_SIZE` | Maximum punches read per run | `5000` |
+| `SYNC_LOOKBACK_DAYS` | Days re-read each run when the ZKTeco database has no `Auto_increment` column | `7` |
 | `PORT` / `SERVER_PORT` | HTTP port (`PORT` is set by Render) | `9010` |
 
 ## Running locally
@@ -146,7 +147,7 @@ Dates use `yyyy-MM-dd` and are inclusive. If you leave out `from` and `to`, toda
 | `GET` | `/api/attendance?employeeId=&from=&to=&page=0&size=100` | Search punches |
 | `GET` | `/api/attendance/employees/{employeeId}?from=&to=` | Punches for one employee |
 | `GET` | `/api/attendance/summary?employeeId=&from=&to=` | Daily first-in / last-out summary |
-| `GET` | `/api/attendance/feed?afterId=0&limit=500` | Incremental feed for downstream systems |
+| `GET` | `/api/attendance/feed?afterId=0&limit=500` | Incremental feed: records stored after the one whose `id` is `afterId`, oldest first |
 | `POST` | `/api/sync` | Run a sync now (returns 503 where `SYNC_ENABLED=false`) |
 | `GET` | `/api/sync/status` | Total records, last synced device id, last run |
 | `GET` | `/api/sync/history?limit=20` | Recent sync runs |

@@ -92,7 +92,8 @@ function Wait-Health([int] $seconds, $process) {
 function Show-SyncResult {
     try {
         $s = Invoke-RestMethod "http://127.0.0.1:$Port/api/sync/status" -TimeoutSec 10
-        Write-Host ("    Punches in database: {0}   last ZKTeco record: {1}" -f $s.totalRecords, $s.lastSourceId)
+        $latest = if ($s.latestPunchAt) { ($s.latestPunchAt -replace 'T', ' ') } else { "none" }
+        Write-Host ("    Punches in database: {0}   latest punch: {1}" -f $s.totalRecords, $latest)
         if ($s.lastRun) {
             Write-Host ("    Last sync: {0}, {1} new punch(es) {2}" -f $s.lastRun.status, $s.lastRun.recordsSynced, $s.lastRun.message)
         }

@@ -92,7 +92,7 @@
 <main class="wrap hidden" id="app">
   <div class="stats">
     <div class="card stat"><div class="label">Total punches</div><div class="value" id="sTotal">–</div><div class="sub">stored in database</div></div>
-    <div class="card stat"><div class="label">Last device record</div><div class="value" id="sLast">–</div><div class="sub">highest synced ZKTeco id</div></div>
+    <div class="card stat"><div class="label">Latest punch</div><div class="value" id="sLast" style="font-size:18px">–</div><div class="sub">most recent punch stored</div></div>
     <div class="card stat"><div class="label">Last sync</div><div class="value" id="sRun" style="font-size:18px">–</div><div class="sub" id="sRunSub">&nbsp;</div></div>
   </div>
 
@@ -183,7 +183,7 @@
   async function loadStatus() {
     const s = await api("/api/sync/status");
     $("sTotal").textContent = s.totalRecords.toLocaleString();
-    $("sLast").textContent = s.lastSourceId.toLocaleString();
+    $("sLast").textContent = s.latestPunchAt ? fmtDateTime(s.latestPunchAt) : "None yet";
     if (s.lastRun) {
       const ok = s.lastRun.status === "SUCCESS";
       $("sRun").innerHTML = `<span class="pill ${ok ? "ok" : "bad"}">${esc(s.lastRun.status)}</span>`;
@@ -216,7 +216,7 @@
       ["Started", (r) => fmtDateTime(r.startedAt)],
       ["Status", (r) => `<span class="pill ${r.status === "SUCCESS" ? "ok" : "bad"}">${esc(r.status)}</span>`],
       ["Records", (r) => r.recordsSynced, "num"],
-      ["Up to record #", (r) => r.lastSourceId, "num"],
+
       ["Message", (r) => `<span class="muted">${esc(r.message || "")}</span>`]
     ]
   };

@@ -25,8 +25,8 @@ public class AttendanceService {
         this.repository = repository;
     }
 
-    public List<AttendanceRecord> findAfter(long sourceId, int limit) {
-        return repository.findAfterSourceId(sourceId, limit);
+    public List<AttendanceRecord> findAfter(long id, int limit) {
+        return repository.findAfterId(id, limit);
     }
 
     public List<AttendanceRecord> search(String employeeId, LocalDate from, LocalDate to, int page, int size) {
@@ -64,5 +64,9 @@ public class AttendanceService {
 
     public long lastSourceId() {
         return repository.maxSourceId();
+    }
+
+    public LocalDateTime latestPunchAt() {
+        return repository.maxCheckTime();
     }
 }

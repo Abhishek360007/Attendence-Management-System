@@ -65,8 +65,14 @@ public class AttendanceRepository {
         return Arrays.stream(results).flatMapToInt(Arrays::stream).map(n -> n < 0 ? 1 : n).sum();
     }
 
-    public List<AttendanceRecord> findAfterSourceId(long sourceId, int limit) {
-        return jdbc.query(SELECT + " WHERE source_id > ? ORDER BY source_id LIMIT ?", ROW_MAPPER, sourceId, limit);
+    /** Records stored after record {@code id}, in insertion order: the incremental feed for downstream systems. */
+    public List<AttendanceRecord> findAfterId(long id, int limit) {
+        return jdbc.query(SELECT + " WHERE id > ? ORDER BY id LIMIT ?", ROW_MAPPER, id, limit);
+    }
+
+    public LocalDateTime maxCheckTime() {
+        Timestamp max = jdbc.queryForObject("SELECT MAX(check_time) FROM attendance_record", Timestamp.class);
+        return max == null ? null : max.toLocalDateTime();
     }
 
     public List<AttendanceRecord> search(String employeeId, LocalDateTime from, LocalDateTime to, int limit, int offset) {

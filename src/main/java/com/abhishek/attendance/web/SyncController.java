@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Validated
@@ -42,6 +43,7 @@ public class SyncController {
         return new SyncStatus(
                 attendanceService.totalRecords(),
                 attendanceService.lastSourceId(),
+                attendanceService.latestPunchAt(),
                 syncRunRepository.findLatest().orElse(null));
     }
 
@@ -50,6 +52,6 @@ public class SyncController {
         return syncRunRepository.findRecent(limit);
     }
 
-    public record SyncStatus(long totalRecords, long lastSourceId, SyncRun lastRun) {
+    public record SyncStatus(long totalRecords, long lastSourceId, LocalDateTime latestPunchAt, SyncRun lastRun) {
     }
 }

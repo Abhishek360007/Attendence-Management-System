@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -26,6 +27,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class SyncService {
 
     private static final Logger log = LoggerFactory.getLogger(SyncService.class);
+    private static final LocalDateTime EPOCH = LocalDateTime.of(1970, 1, 1, 0, 0);
 
     private final DeviceRepository deviceRepository;
     private final AttendanceRepository attendanceRepository;
@@ -68,21 +70,36 @@ public class SyncService {
         long lastId = attendanceRepository.maxSourceId();
         SyncRun run;
         try {
-            List<DevicePunch> punches = deviceRepository.fetchAfter(lastId, properties.sync().batchSize());
+            int batchSize = properties.sync().batchSize();
+            List<DevicePunch> punches = new ArrayList<>();
+            long newLastId;
+            if (deviceRepository.mode() == DeviceRepository.Mode.AUTO_INCREMENT) {
+                punches.addAll(deviceRepository.fetchAfter(lastId, batchSize));
+                newLastId = punches.isEmpty() ? lastId : punches.get(punches.size() - 1).autoIncrement();
+            } else {
+                // Newer punches first, then a rescan of the last few days: ZKTime downloads device logs late,
+                // so punches can appear with times older than the newest one already stored.
+                LocalDateTime latest = attendanceRepository.maxCheckTime();
+                punches.addAll(deviceRepository.fetchAfterTime(latest != null ? latest : EPOCH, batchSize));
+                if (latest != null) {
+                    punches.addAll(deviceRepository.fetchTimeRange(
+                            latest.minusDays(properties.sync().lookbackDays()), latest));
+                }
+                newLastId = 0;
+            }
             List<AttendanceRecord> records = punches.stream()
                     .filter(p -> p.badgeNumber() != null && !p.badgeNumber().isBlank())
                     .map(DevicePunch::toRecord)
                     .toList();
 
             Integer inserted = transactionTemplate.execute(status -> attendanceRepository.insertAll(records));
-            long newLastId = punches.isEmpty() ? lastId : punches.get(punches.size() - 1).autoIncrement();
 
             run = new SyncRun(null, started, LocalDateTime.now(), newLastId,
                     inserted == null ? 0 : inserted, SyncRun.Status.SUCCESS, null);
             if (run.recordsSynced() > 0) {
-                log.info("Synced {} punch(es), device id {} -> {}", run.recordsSynced(), lastId, newLastId);
+                log.info("Synced {} new punch(es) ({} read from the ZKTeco database)", run.recordsSynced(), punches.size());
             } else {
-                log.debug("No new punches after device id {}", lastId);
+                log.debug("No new punches ({} read)", punches.size());
             }
         } catch (Exception e) {
             log.error("Attendance sync failed", e);

@@ -65,7 +65,8 @@ public class AttendanceController {
     }
 
     /**
-     * Incremental feed for downstream systems: records whose device id is greater than {@code afterId}.
+     * Incremental feed for downstream systems: records stored after record {@code afterId} (the {@code id} field),
+     * in the order they were stored. Pass the last {@code id} you received to get the next page.
      */
     @GetMapping("/feed")
     public List<AttendanceRecord> feed(

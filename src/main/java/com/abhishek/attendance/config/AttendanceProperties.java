@@ -18,6 +18,7 @@ public record AttendanceProperties(String apiKey, Device device, Sync sync) {
         }
     }
 
-    public record Sync(boolean enabled, String cron, int batchSize) {
+    /** @param lookbackDays CHECK_TIME layout only: days rescanned each run to catch punches downloaded late */
+    public record Sync(boolean enabled, String cron, int batchSize, int lookbackDays) {
     }
 }

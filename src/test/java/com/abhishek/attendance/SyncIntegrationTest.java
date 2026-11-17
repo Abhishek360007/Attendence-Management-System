@@ -60,9 +60,32 @@ class SyncIntegrationTest {
     MockMvc mvc;
 
     @BeforeEach
-    void clean() {
-        jdbc.update("DELETE FROM attendance_record");
-        jdbc.update("DELETE FROM sync_run");
+    void clean() throws Exception {
+        jdbc.update("TRUNCATE attendance_record, sync_run RESTART IDENTITY");
+        when(deviceRepository.mode()).thenReturn(DeviceRepository.Mode.AUTO_INCREMENT);
+    }
+
+    @Test
+    void checkTimeLayoutPicksUpLateDownloadedPunchesWithoutDuplicates() throws Exception {
+        when(deviceRepository.mode()).thenReturn(DeviceRepository.Mode.CHECK_TIME);
+        DevicePunch in = punch(1001, "101", DAY.withHour(9));
+        DevicePunch out = punch(1002, "101", DAY.withHour(18));
+        DevicePunch late = punch(1003, "102", DAY.withHour(10));   // from a device downloaded hours later
+
+        when(deviceRepository.fetchAfterTime(eq(LocalDateTime.of(1970, 1, 1, 0, 0)), anyInt())).thenReturn(List.of(in, out));
+        assertThat(syncService.sync().recordsSynced()).isEqualTo(2);
+
+        // Next run: nothing newer than 18:00, but the rescan window now contains the late punch.
+        when(deviceRepository.fetchAfterTime(eq(DAY.withHour(18)), anyInt())).thenReturn(List.of());
+        when(deviceRepository.fetchTimeRange(DAY.withHour(18).minusDays(7), DAY.withHour(18)))
+                .thenReturn(List.of(in, late, out));
+        SyncRun second = syncService.sync();
+
+        assertThat(second.status()).isEqualTo(SyncRun.Status.SUCCESS);
+        assertThat(second.recordsSynced()).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM attendance_record", Integer.class)).isEqualTo(3);
+        mvc.perform(api(get("/api/sync/status")))
+                .andExpect(jsonPath("$.latestPunchAt").value("2026-11-02T18:00:00"));
     }
 
     @Test
