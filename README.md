@@ -16,6 +16,19 @@ An attendance, leave and payroll system for companies using **ZKTeco biometric d
 
 ZKTeco's desktop software (ZKTime / ZKAccess) stores every punch it downloads from the devices in an MS Access database, usually `ATT2000.MDB`. A small sync agent on the office PC copies new punches from that file into PostgreSQL, and everything else is calculated from them.
 
+## Screenshots
+
+All screenshots use made-up demo data.
+
+| | |
+|---|---|
+| ![Employee dashboard](docs/screenshots/02-employee-dashboard.png) **Employee dashboard:** today's punches, leave balance and this month's totals | ![Daily register](docs/screenshots/03-daily-register.png) **Daily register:** everyone's status, in/out times, late minutes and overtime for a day |
+| ![Employee profile](docs/screenshots/04-employee-profile.png) **Employee profile:** details, monthly totals and an attendance calendar | ![Analytics](docs/screenshots/05-analytics.png) **Analytics:** KPIs against last month, trends and attendance by department |
+| ![Payroll](docs/screenshots/06-payroll.png) **Payroll:** payable days, overtime and gross pay per employee, exportable as CSV | ![Leave](docs/screenshots/07-leave.png) **Leave:** requests with approve and reject, and the decision trail |
+| ![Sign-in](docs/screenshots/08-sign-in.png) **Sign-in:** personal accounts with four roles | ![Dark mode](docs/screenshots/10-dark-mode.png) **Dark mode:** follows the device setting |
+
+<p align="center"><img src="docs/screenshots/09-mobile.png" alt="Mobile view" width="280"><br><b>On a phone:</b> the menu slides in, and cards and tables stack</p>
+
 ## Features
 
 **For everyone**
