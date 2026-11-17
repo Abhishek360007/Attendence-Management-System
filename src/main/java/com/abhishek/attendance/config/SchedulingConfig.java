@@ -1,11 +1,15 @@
 package com.abhishek.attendance.config;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+/**
+ * Scheduled work: the device sync (only where SYNC_ENABLED=true) and notification jobs (NOTIFICATIONS_ENABLED).
+ * Async is used to send notification emails after a request has finished.
+ */
 @Configuration
 @EnableScheduling
-@ConditionalOnProperty(prefix = "attendance.sync", name = "enabled", havingValue = "true", matchIfMissing = true)
+@EnableAsync
 public class SchedulingConfig {
 }

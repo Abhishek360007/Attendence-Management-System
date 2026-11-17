@@ -367,7 +367,7 @@ export function downloadCsv(filename, header, rows) {
     return `"${s.replace(/"/g, '""')}"`;
   };
   const text = [header, ...rows].map((r) => r.map(cell).join(",")).join("\r\n");
-  const blob = new Blob(["﻿" + text], { type: "text/csv;charset=utf-8" });
+  const blob = new Blob([String.fromCharCode(0xfeff) + text], { type: "text/csv;charset=utf-8" });
   const a = h("a", { href: URL.createObjectURL(blob), download: filename });
   document.body.append(a);
   a.click();
