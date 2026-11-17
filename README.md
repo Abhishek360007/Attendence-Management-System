@@ -1,5 +1,17 @@
 # Attendance Management System
 
+[![Java 25](https://img.shields.io/badge/Java-25-orange?logo=openjdk)](https://adoptium.net)
+[![Spring Boot 4.1](https://img.shields.io/badge/Spring%20Boot-4.1-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![PostgreSQL 18](https://img.shields.io/badge/PostgreSQL-18-4169E1?logo=postgresql&logoColor=white)](https://neon.tech)
+[![Deployed on Render](https://img.shields.io/badge/Deployed%20on-Render-46E3B7?logo=render&logoColor=white)](https://attendance-management-system-5pid.onrender.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+**Live:** https://attendance-management-system-5pid.onrender.com
+
+![Dashboard](docs/screenshots/01-dashboard.png)
+
+**Contents:** [Screenshots](#screenshots) · [Features](#features) · [Architecture](#architecture) · [Deploying](#deploying) · [Roles](#roles) · [How things are calculated](#how-things-are-calculated) · [Configuration](#configuration) · [REST API](#rest-api) · [Testing](#testing)
+
 An attendance, leave and payroll system for companies using **ZKTeco biometric devices**. It syncs punches from the devices into **PostgreSQL**, works out who was present, late, absent or on leave, and gives HR, managers and employees a web dashboard and a REST API. It is designed to run on **Render** with a **Neon** serverless Postgres database.
 
 ZKTeco's desktop software (ZKTime / ZKAccess) stores every punch it downloads from the devices in an MS Access database, usually `ATT2000.MDB`. A small sync agent on the office PC copies new punches from that file into PostgreSQL, and everything else is calculated from them.
