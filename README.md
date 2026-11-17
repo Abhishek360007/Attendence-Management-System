@@ -38,6 +38,13 @@ All screenshots use made-up demo data.
 - **Punch corrections:** ask to add a missed punch, change a wrong time or remove a duplicate.
 - **Notifications** in the dashboard, and by email when a mail server is configured.
 
+**Interface**
+- A clean dashboard that changes with the role: a welcome banner, today's numbers at a glance, and quick actions such as *Apply for leave* or *Fix a punch*.
+- Each person gets their own colour of initials avatar, and statuses are shown as colour-coded pills.
+- Dark mode follows the device setting, and the layout works on phones.
+- Charts with hover tooltips, and a table view of the same numbers for accessibility.
+- Everything ships inside the app (font, icons, scripts): there is no build step and nothing loads from outside, which keeps it fast and the security policy strict.
+
 **Attendance rules**
 - Work schedules set start and end times, late and early-departure grace periods, the overtime threshold, the half-day threshold and weekly offs.
 - Night shifts that end the next day are supported.
