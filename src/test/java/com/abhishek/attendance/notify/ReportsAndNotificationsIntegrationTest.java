@@ -85,6 +85,26 @@ class ReportsAndNotificationsIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    void daysBeforeTheFirstDevicePunchAreNotAbsences() throws Exception {
+        long old = id(hr.post("/api/employees", "{\"employeeCode\":\"E9\",\"deviceUserId\":\"109\",\"fullName\":\"Old Timer\",\"monthlySalary\":30000,\"joinedOn\":\"2025-01-01\"}"));
+        punch("109", "2026-10-01 09:00", 1);
+        punch("109", "2026-10-01 18:00", 2);
+
+        hr.get("/api/payroll?month=2026-09").andExpect(jsonPath("$.rows[?(@.fullName == 'Old Timer')]", hasSize(0)));
+        hr.get("/api/employees/{id}/attendance?from=2026-09-28&to=2026-10-02", old)
+                .andExpect(jsonPath("$.days", hasSize(2)))
+                .andExpect(jsonPath("$.days[0].date").value("2026-10-01"));
+
+        // An explicit start date wins over the first punch.
+        hr.put("/api/settings", "{\"tracking_start_date\":\"2026-09-29\"}").andExpect(status().isForbidden()); // HR may not change settings
+        jdbc.update("INSERT INTO company_setting (key, value) VALUES ('tracking_start_date', '2026-09-29')");
+        settingsService.evictCache();
+        hr.get("/api/employees/{id}/attendance?from=2026-09-28&to=2026-10-02", old)
+                .andExpect(jsonPath("$.days[0].date").value("2026-09-29"))
+                .andExpect(jsonPath("$.days[0].status").value("ABSENT"));
+    }
+
+    @Test
     void analyticsSummarisesTheMonth() throws Exception {
         punch("102", "2026-10-01 09:00", 1);
         punch("102", "2026-10-01 18:00", 2);

@@ -33,6 +33,7 @@ public class SettingsService {
         m.put("hr_notification_emails", "");
         m.put("notify_absence_time", "11:00");
         m.put("notify_employees_late", "true");
+        m.put("tracking_start_date", "");
         return m;
     }
 
@@ -133,6 +134,15 @@ public class SettingsService {
                     java.time.LocalTime.parse(value);
                 } catch (DateTimeException e) {
                     throw new IllegalArgumentException("Absence alert time must look like 11:00.");
+                }
+            }
+            case "tracking_start_date" -> {
+                if (!value.isEmpty()) {
+                    try {
+                        LocalDate.parse(value);
+                    } catch (DateTimeException e) {
+                        throw new IllegalArgumentException("Tracking start date must look like 2026-01-31.");
+                    }
                 }
             }
             case "notify_employees_late" -> {

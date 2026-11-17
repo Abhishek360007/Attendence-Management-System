@@ -79,6 +79,7 @@ public class PayrollService {
         List<Row> rows = new ArrayList<>();
         BigDecimal total = BigDecimal.ZERO;
         for (AttendanceCalculator.EmployeeAttendance a : calculator.compute(list, from, to)) {
+            if (a.days().isEmpty()) continue; // not employed, or not yet tracked, in this month
             Row r = row(a, month, multiplier, holidays);
             rows.add(r);
             if (r.grossPay() != null) total = total.add(r.grossPay());

@@ -31,6 +31,8 @@ param(
     [string] $SyncCron = "0 */1 * * * *",
     [int] $Port = 9010,
     [PSCredential] $ServiceAccount,
+    # Extra settings for the agent, e.g. @{ MAIL_HOST = "smtp.gmail.com"; MAIL_USERNAME = "x@gmail.com"; MAIL_PASSWORD = "..."; PUBLIC_URL = "https://..." }
+    [hashtable] $Environment = @{},
     [switch] $TestOnly
 )
 
@@ -169,6 +171,7 @@ $settings = [ordered]@{
     # The agent's own dashboard/API is reachable from this PC only.
     SERVER_ADDRESS  = "127.0.0.1"
 }
+foreach ($k in $Environment.Keys) { $settings[$k] = [string]$Environment[$k] }
 
 # ---------------------------------------------------------------------------------------------------------
 if ($TestOnly) {

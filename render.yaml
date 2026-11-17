@@ -15,8 +15,20 @@ services:
         sync: false
       - key: DB_PASSWORD
         sync: false
-      # Clients must send this as the X-API-Key header. Render generates a random value.
+      # Needed once to create the first admin on the setup screen, and by machine clients (X-API-Key header).
       - key: API_KEY
         generateValue: true
       - key: SYNC_ENABLED
         value: "false"
+      # Dashboard address, used for links in notification emails.
+      - key: PUBLIC_URL
+        sync: false
+      # Optional email (e.g. Gmail: smtp.gmail.com, 587, your address, an app password).
+      - key: MAIL_HOST
+        sync: false
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false

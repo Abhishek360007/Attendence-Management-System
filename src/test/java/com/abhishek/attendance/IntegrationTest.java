@@ -41,10 +41,14 @@ public abstract class IntegrationTest {
     @Autowired
     protected com.abhishek.attendance.settings.SettingsService settingsService;
 
+    @Autowired
+    protected com.abhishek.attendance.engine.AttendanceCalculator attendanceCalculator;
+
     @BeforeEach
     void emptyDatabase() {
         loginRateLimiter.reset();
         settingsService.evictCache();
+        attendanceCalculator.evictCache();
         List<String> tables = jdbc.queryForList("""
                 SELECT tablename FROM pg_tables
                 WHERE schemaname = 'public' AND tablename <> 'flyway_schema_history'

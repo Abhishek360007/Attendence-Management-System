@@ -88,7 +88,7 @@ function buildShell() {
   const shellEl = h("div", { class: "shell" });
   const closeNav = () => shellEl.classList.remove("nav-open");
   const sidebar = h("aside", { class: "sidebar" },
-    h("div", { class: "brand" }, LOGO(), "Attendance"),
+    h("div", { class: "brand" }, LOGO(), session.settings?.company_name || "Attendance"),
     nav,
     h("div", { class: "me" },
       h("strong", null, session.me.displayName),
@@ -98,7 +98,7 @@ function buildShell() {
   const topbar = h("header", { class: "topbar" },
     h("button", { class: "icon-btn", type: "button", "aria-label": "Menu",
                   onclick: () => shellEl.classList.toggle("nav-open") }, "☰"),
-    h("strong", null, "Attendance"));
+    h("strong", null, session.settings?.company_name || "Attendance"));
   mount(shellEl, sidebar, h("div", { style: "min-width:0" }, topbar, content));
   nav.addEventListener("click", (e) => { if (e.target.closest("a")) closeNav(); });
   mount(root, shellEl);
@@ -110,7 +110,7 @@ export function renderNav() {
   if (!shell) return;
   const path = currentPath();
   mount(shell.nav, NAV.map((group) => {
-    const items = group.items.filter((i) => !i.roles || hasRole(...i.roles));
+    const items = group.items.filter((i) => (!i.roles || hasRole(...i.roles)) && (!i.show || i.show()));
     if (!items.length) return null;
     return [group.label ? h("div", { class: "nav-group" }, group.label) : null,
       items.map((i) => h("a", {
@@ -161,9 +161,29 @@ async function start() {
     mount(root, h("div", { class: "auth" }, errorBox(e.message)));
     return;
   }
+  const [employee, settings] = await Promise.all([
+    api.raw("GET", "/api/employees/me", undefined, { quiet401: true }).catch(() => null),
+    api.raw("GET", "/api/settings/public", undefined, { quiet401: true }).catch(() => null)
+  ]);
+  session.employee = employee;
+  session.settings = settings;
   shell = null;
+  pollUnread();
   render();
 }
+
+let pollTimer = null;
+async function pollUnread() {
+  clearTimeout(pollTimer);
+  if (!session.me) return;
+  try {
+    const r = await api.raw("GET", "/api/notifications/unread", undefined, { quiet401: true });
+    if (r.count !== session.unread) { session.unread = r.count; renderNav(); }
+  } catch { /* ignore; retried */ }
+  pollTimer = setTimeout(pollUnread, 60000);
+}
+// Pages fire this after marking notifications read.
+window.addEventListener("unread-changed", () => pollUnread());
 
 setUnauthorizedHandler(() => {
   if (session.me) {

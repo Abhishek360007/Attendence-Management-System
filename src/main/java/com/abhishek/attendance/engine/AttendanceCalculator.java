@@ -75,16 +75,47 @@ public class AttendanceCalculator {
         Map<String, List<LocalDateTime>> punches = punches(
                 list.stream().map(Employee::deviceUserId).filter(Objects::nonNull).toList(), from, to);
         LocalDateTime now = settings.now();
+        LocalDate tracking = trackingStart();
 
         List<EmployeeAttendance> out = new ArrayList<>(list.size());
         for (Employee e : list) {
             WorkSchedule s = resolve(e, scheduleById, deptSchedule, fallback);
-            List<DayRecord> days = AttendanceEngine.days(s, e.joinedOn(), e.leftOn(), from, to,
+            // Days before attendance was tracked are treated like days before joining: not absences.
+            LocalDate start = e.joinedOn() == null || e.joinedOn().isBefore(tracking) ? tracking : e.joinedOn();
+            List<DayRecord> days = AttendanceEngine.days(s, start, e.leftOn(), from, to,
                     e.deviceUserId() == null ? List.of() : punches.getOrDefault(e.deviceUserId(), List.of()),
                     holidays, leaves.getOrDefault(e.id(), Map.of()), now);
             out.add(new EmployeeAttendance(e, s, days, PeriodSummary.of(days)));
         }
         return out;
+    }
+
+    /**
+     * The first day attendance is judged: the tracking_start_date setting if set, otherwise the date of the first
+     * device punch (today if there are none yet). Without this, employees who joined before the system was installed
+     * would show as absent for every earlier day.
+     */
+    public LocalDate trackingStart() {
+        String configured = settings.get("tracking_start_date");
+        if (configured != null && !configured.isBlank()) {
+            return LocalDate.parse(configured.trim());
+        }
+        long now = System.currentTimeMillis();
+        if (firstPunch == null || now - firstPunchLoadedAt > 60_000) {
+            java.sql.Date d = jdbc.sql("SELECT MIN(check_time)::date FROM attendance_record WHERE source = 'DEVICE'")
+                    .query(java.sql.Date.class).optional().orElse(null);
+            firstPunch = java.util.Optional.ofNullable(d == null ? null : d.toLocalDate());
+            firstPunchLoadedAt = now;
+        }
+        return firstPunch.orElse(settings.today());
+    }
+
+    private volatile java.util.Optional<LocalDate> firstPunch;
+    private volatile long firstPunchLoadedAt;
+
+    /** Forgets the cached first punch date (tests). */
+    public void evictCache() {
+        firstPunch = null;
     }
 
     public WorkSchedule scheduleOf(Employee e) {

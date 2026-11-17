@@ -32,6 +32,7 @@ class OrganizationIntegrationTest extends IntegrationTest {
         users.create("hr@example.com", "HR", "hr-pass-123", Role.HR);
         hr = browser().login("hr@example.com", "hr-pass-123");
         jdbc.update("UPDATE company_setting SET value = 'UTC' WHERE key = 'timezone'");
+        jdbc.update("INSERT INTO company_setting (key, value) VALUES ('tracking_start_date', '2025-01-01')");
         settingsService.evictCache();
 
         sales = id(hr.post("/api/departments", "{\"name\":\"Sales\"}").andExpect(status().isOk()));
