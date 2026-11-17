@@ -168,7 +168,6 @@ $settings = [ordered]@{
     SERVER_PORT     = "$Port"
     # The agent's own dashboard/API is reachable from this PC only.
     SERVER_ADDRESS  = "127.0.0.1"
-    SCHEMA_INIT     = "always"
 }
 
 # ---------------------------------------------------------------------------------------------------------

@@ -7,17 +7,8 @@ import com.abhishek.attendance.service.SyncService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -35,15 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-@Testcontainers
-class SyncIntegrationTest {
-
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:18-alpine");
+class SyncIntegrationTest extends IntegrationTest {
 
     private static final LocalDateTime DAY = LocalDateTime.of(2026, 11, 2, 0, 0);
 
@@ -53,15 +36,8 @@ class SyncIntegrationTest {
     @Autowired
     SyncService syncService;
 
-    @Autowired
-    JdbcTemplate jdbc;
-
-    @Autowired
-    MockMvc mvc;
-
     @BeforeEach
-    void clean() throws Exception {
-        jdbc.update("TRUNCATE attendance_record, sync_run RESTART IDENTITY");
+    void stubLayout() throws Exception {
         when(deviceRepository.mode()).thenReturn(DeviceRepository.Mode.AUTO_INCREMENT);
     }
 
@@ -156,7 +132,7 @@ class SyncIntegrationTest {
         mvc.perform(get("/")).andExpect(status().isOk()).andExpect(forwardedUrl("index.html"));
         mvc.perform(get("/index.html"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Attendance Dashboard")));
+                .andExpect(content().string(containsString("assets/app.js")));
     }
 
     private static MockHttpServletRequestBuilder api(MockHttpServletRequestBuilder request) {

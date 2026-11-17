@@ -6,6 +6,7 @@ import com.abhishek.attendance.service.SyncService;
 import com.abhishek.attendance.repository.SyncRunRepository;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +20,7 @@ import java.util.List;
 @Validated
 @RestController
 @RequestMapping("/api/sync")
+@PreAuthorize("hasAnyRole('ADMIN', 'HR', 'API')")
 public class SyncController {
 
     private final SyncService syncService;
@@ -34,6 +36,7 @@ public class SyncController {
 
     /** Trigger a sync immediately instead of waiting for the schedule. */
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'API')")
     public SyncRun syncNow() {
         return syncService.sync();
     }

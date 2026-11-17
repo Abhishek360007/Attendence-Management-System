@@ -71,7 +71,7 @@ class DeviceRepositoryTest {
     }
 
     private static DeviceRepository repository(Path mdb) {
-        return new DeviceRepository(new AttendanceProperties("",
+        return new DeviceRepository(new AttendanceProperties("", null,
                 new AttendanceProperties.Device(mdb.toString().replace('\\', '/')),
                 new AttendanceProperties.Sync(true, "-", 5000, 7)));
     }
