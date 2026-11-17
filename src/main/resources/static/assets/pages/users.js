@@ -1,4 +1,4 @@
-import { api, card, fmtDateTime, formModal, h, load, mount, pageHead, pill, session, table, titleCase, toast } from "../core.js";
+import { api, card, fmtDateTime, formModal, h, load, mount, pageHead, person, pill, session, table, titleCase, toast } from "../core.js";
 
 export const ROLE_OPTIONS = [
   { value: "EMPLOYEE", label: "Employee: own attendance, leave and corrections" },
@@ -21,8 +21,7 @@ export const page = {
 
     function refresh() {
       load(body, () => api.get("/api/users"), (users) => table([
-        { label: "Name", value: (u) => h("strong", null, u.displayName) },
-        { label: "Email", value: (u) => u.email },
+        { label: "Name", value: (u) => person(u.displayName, u.email) },
         { label: "Role", value: (u) => titleCase(u.role) },
         { label: "Status", value: (u) => (u.active ? pill("Active", "ok") : pill("Deactivated", "neutral")) },
         { label: "Last sign-in", value: (u) => (u.lastLoginAt ? fmtDateTime(u.lastLoginAt) : "Never") },

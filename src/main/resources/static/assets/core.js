@@ -1,6 +1,8 @@
 // Shared building blocks for every page: DOM helper, API client, router, formatting and UI widgets.
 // Everything user-supplied is inserted as text (never as HTML).
 
+import { icon } from "./icons.js";
+
 // ---------------------------------------------------------------- DOM
 const BOOL_PROPS = new Set(["disabled", "checked", "selected", "required", "hidden", "multiple", "readOnly"]);
 
@@ -198,16 +200,39 @@ export function pageHead(title, ...actions) {
   return h("div", { class: "page-head" }, h("h1", null, title), h("div", { class: "actions" }, actions));
 }
 
-export function stat(label, value, sub) {
-  return h("div", { class: "card stat" },
-    h("div", { class: "label" }, label), h("div", { class: "value" }, value), sub ? h("div", { class: "sub" }, sub) : null);
+/** Stat tile. opts.icon names an icon from icons.js; opts.tone is blue | green | amber | red | violet | slate. */
+export function stat(label, value, sub, opts = {}) {
+  const tone = opts.tone || "slate";
+  return h("div", { class: `card stat tone-${tone}` },
+    opts.icon ? h("div", { class: "stat-icon" }, icon(opts.icon, 20)) : null,
+    h("div", { class: "stat-main" },
+      h("div", { class: "label" }, label), h("div", { class: "value" }, value), sub ? h("div", { class: "sub" }, sub) : null));
+}
+
+const AVATAR_COLORS = ["#4f46e5", "#0891b2", "#059669", "#d97706", "#db2777", "#7c3aed", "#2563eb", "#dc2626", "#0d9488", "#9333ea"];
+
+/** Initials in a circle; the colour is derived from the name so each person keeps theirs. */
+export function avatar(name, size = "") {
+  const text = (name || "?").trim();
+  const parts = text.split(/\s+/).filter(Boolean);
+  const initials = ((parts[0]?.[0] || "?") + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase();
+  let hash = 0;
+  for (const ch of text) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+  return h("span", { class: `avatar ${size}`, style: `background:${AVATAR_COLORS[hash % AVATAR_COLORS.length]}`, "aria-hidden": "true" }, initials);
+}
+
+/** Avatar + name (+ optional second line), optionally linked. */
+export function person(name, sub, href) {
+  const text = h("span", { class: "person-text" }, href ? h("a", { href }, name) : h("strong", { style: "font-weight:550" }, name),
+    sub ? h("span", { class: "muted" }, sub) : null);
+  return h("span", { class: "person" }, avatar(name, "sm"), text);
 }
 
 /**
  * columns: [{ label, value: row => string|Node, class?, csv?: row => value }]
  */
 export function table(columns, rows, { empty = "Nothing to show.", onRowClick } = {}) {
-  if (!rows || rows.length === 0) return h("div", { class: "empty" }, empty);
+  if (!rows || rows.length === 0) return h("div", { class: "empty" }, icon("inbox", 28), empty);
   return h("div", { class: "table-wrap" },
     h("table", null,
       h("thead", null, h("tr", null, columns.map((c) => h("th", { class: c.class || "" }, c.label)))),
@@ -385,3 +410,4 @@ export async function load(container, loader, render) {
     if (e.status !== 401) mount(container, errorBox(e.message));
   }
 }
+export { icon };

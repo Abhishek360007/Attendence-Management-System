@@ -26,35 +26,35 @@ const hasProfile = () => !!session.employee;
 export const NAV = [
   {
     label: null, items: [
-      { path: "/dashboard", label: "Dashboard" },
-      { path: "/my-attendance", label: "My attendance", show: hasProfile },
-      { path: "/leave", label: "Leave" },
-      { path: "/corrections", label: "Punch corrections" },
-      { path: "/notifications", label: "Notifications",
+      { path: "/dashboard", icon: "dashboard", label: "Dashboard" },
+      { path: "/my-attendance", icon: "calendar", label: "My attendance", show: hasProfile },
+      { path: "/leave", icon: "leave", label: "Leave" },
+      { path: "/corrections", icon: "wrench", label: "Punch corrections" },
+      { path: "/notifications", icon: "bell", label: "Notifications",
         badge: () => (session.unread ? h("span", { class: "badge-count" }, session.unread > 99 ? "99+" : session.unread) : null) }
     ]
   },
   {
     label: "Team", items: [
-      { path: "/register", label: "Daily register", roles: LEADS },
-      { path: "/employees", label: "Employees", roles: LEADS },
-      { path: "/reports", label: "Punctuality report", roles: LEADS },
-      { path: "/analytics", label: "Analytics", roles: LEADS }
+      { path: "/register", icon: "clipboard", label: "Daily register", roles: LEADS },
+      { path: "/employees", icon: "users", label: "Employees", roles: LEADS },
+      { path: "/reports", icon: "report", label: "Punctuality report", roles: LEADS },
+      { path: "/analytics", icon: "chart", label: "Analytics", roles: LEADS }
     ]
   },
   {
     label: "HR", items: [
-      { path: "/payroll", label: "Payroll", roles: STAFF },
-      { path: "/organization", label: "Departments & schedules", roles: STAFF }
+      { path: "/payroll", icon: "wallet", label: "Payroll", roles: STAFF },
+      { path: "/organization", icon: "building", label: "Departments & schedules", roles: STAFF }
     ]
   },
   {
     label: "System", items: [
-      { path: "/punches", label: "Raw punches", roles: STAFF },
-      { path: "/sync", label: "Device sync", roles: STAFF },
-      { path: "/users", label: "Users", roles: ["ADMIN"] },
-      { path: "/audit", label: "Audit log", roles: STAFF },
-      { path: "/settings", label: "Settings", roles: ["ADMIN"] }
+      { path: "/punches", icon: "fingerprint", label: "Raw punches", roles: STAFF },
+      { path: "/sync", icon: "sync", label: "Device sync", roles: STAFF },
+      { path: "/users", icon: "userCog", label: "Users", roles: ["ADMIN"] },
+      { path: "/audit", icon: "shield", label: "Audit log", roles: STAFF },
+      { path: "/settings", icon: "settings", label: "Settings", roles: ["ADMIN"] }
     ]
   }
 ];

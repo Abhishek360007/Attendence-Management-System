@@ -1,4 +1,4 @@
-import { api, card, currentQuery, fmtMonth, fmtNumber, fmtPercent, h, load, mount, monthISO, navigate, pageHead, replaceQuery, stat, table } from "../core.js";
+import { api, card, currentQuery, fmtMonth, fmtNumber, fmtPercent, h, load, mount, monthISO, navigate, pageHead, person, replaceQuery, stat, table } from "../core.js";
 import { barList, lineChart, tableView } from "../charts.js";
 import { departmentFilter, monthInput } from "../ui.js";
 
@@ -24,7 +24,7 @@ export const page = {
     const state = { month: q.get("month") || monthISO(), months: Number(q.get("months")) || 6, departmentId: q.get("departmentId") || "" };
     const range = h("select", { onchange: () => { state.months = Number(range.value); refresh(); } },
       [3, 6, 12].map((n) => h("option", { value: n, selected: n === state.months }, `${n} months`)));
-    const filters = h("div", { class: "filters", style: "padding:0 0 16px" },
+    const filters = h("div", { class: "filters", style: "padding:0 0 16px;border:0" },
       monthInput(state.month, (m) => { state.month = m; refresh(); }),
       h("label", { class: "field" }, "Trend over", range),
       await departmentFilter(state.departmentId, (v) => { state.departmentId = v; refresh(); }));
@@ -39,18 +39,18 @@ export const page = {
         const trendPoints = r.trend.map((t) => ({ label: shortMonth(t.month), value: t.kpis.attendancePercent }));
         const latePoints = r.trend.map((t) => ({ label: shortMonth(t.month), value: t.kpis.employees ? t.kpis.lateArrivals : null }));
         const people = (list, value, empty) => table([
-          { label: "Employee", value: (e) => h("a", { href: `#/employees/${e.employeeId}` }, e.fullName) },
+          { label: "Employee", value: (e) => person(e.fullName, null, `#/employees/${e.employeeId}`) },
           { label: "Department", value: (e) => e.departmentName || "–" },
           ...value
         ], list, { empty, onRowClick: (e) => navigate(`/employees/${e.employeeId}`) });
         return [
           h("div", { class: "stats" },
-            stat("Attendance", fmtPercent(c.attendancePercent), delta(c.attendancePercent, p.attendancePercent, { unit: " pts" })),
-            stat("On time", fmtPercent(c.punctualityPercent), delta(c.punctualityPercent, p.punctualityPercent, { unit: " pts" })),
-            stat("Late arrivals", c.lateArrivals, delta(c.lateArrivals, p.lateArrivals, { better: "down", digits: 0 })),
-            stat("Absent days", fmtNumber(c.absentDays, c.absentDays % 1 ? 1 : 0), delta(c.absentDays, p.absentDays, { better: "down" })),
-            stat("Overtime", `${fmtNumber(c.overtimeHours, 1)} h`, delta(c.overtimeHours, p.overtimeHours, { unit: " h", better: "flat" })),
-            stat("Avg. day", c.avgWorkedHoursPerDay === null ? "–" : `${fmtNumber(c.avgWorkedHoursPerDay, 1)} h`, `${c.employees} employees, ${fmtMonth(state.month)}`)),
+            stat("Attendance", fmtPercent(c.attendancePercent), delta(c.attendancePercent, p.attendancePercent, { unit: " pts" }), { icon: "check", tone: "green" }),
+            stat("On time", fmtPercent(c.punctualityPercent), delta(c.punctualityPercent, p.punctualityPercent, { unit: " pts" }), { icon: "clock", tone: "blue" }),
+            stat("Late arrivals", c.lateArrivals, delta(c.lateArrivals, p.lateArrivals, { better: "down", digits: 0 }), { icon: "alert", tone: "amber" }),
+            stat("Absent days", fmtNumber(c.absentDays, c.absentDays % 1 ? 1 : 0), delta(c.absentDays, p.absentDays, { better: "down" }), { icon: "xCircle", tone: "red" }),
+            stat("Overtime", `${fmtNumber(c.overtimeHours, 1)} h`, delta(c.overtimeHours, p.overtimeHours, { unit: " h", better: "flat" }), { icon: "hourglass", tone: "violet" }),
+            stat("Avg. day", c.avgWorkedHoursPerDay === null ? "–" : `${fmtNumber(c.avgWorkedHoursPerDay, 1)} h`, `${c.employees} employees, ${fmtMonth(state.month)}`, { icon: "trendUp", tone: "slate" })),
           h("div", { class: "two-col" },
             card("Attendance % by month", [
               lineChart(trendPoints, { yMax: 100, format: (v) => `${Math.round(v)}%`, ariaLabel: "Attendance percentage by month" }),

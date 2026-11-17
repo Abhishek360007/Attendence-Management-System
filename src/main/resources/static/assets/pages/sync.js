@@ -22,9 +22,9 @@ export const page = {
       const s = await api.get("/api/sync/status").catch(() => null);
       if (s) {
         mount(stats,
-          stat("Total punches", s.totalRecords.toLocaleString()),
-          stat("Latest punch", s.latestPunchAt ? fmtDateTime(s.latestPunchAt) : "None yet"),
-          stat("Last run", s.lastRun ? fmtDateTime(s.lastRun.startedAt) : "Never", s.lastRun?.status));
+          stat("Total punches", s.totalRecords.toLocaleString(), "stored", { icon: "fingerprint", tone: "blue" }),
+          stat("Latest punch", s.latestPunchAt ? fmtDateTime(s.latestPunchAt) : "None yet", "from the devices", { icon: "clock", tone: "violet" }),
+          stat("Last run", s.lastRun ? fmtDateTime(s.lastRun.startedAt) : "Never", s.lastRun?.status, { icon: "sync", tone: s.lastRun?.status === "FAILED" ? "red" : "green" }));
       }
       load(history, () => api.get("/api/sync/history", { limit: 50 }), (runs) => table([
         { label: "Started", value: (r) => fmtDateTime(r.startedAt) },

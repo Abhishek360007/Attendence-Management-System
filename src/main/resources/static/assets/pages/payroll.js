@@ -1,4 +1,4 @@
-import { api, card, currentQuery, fmtHours, fmtMonth, fmtNumber, h, load, mount, monthISO, pageHead, replaceQuery, stat, table } from "../core.js";
+import { api, card, currentQuery, fmtHours, fmtMonth, fmtNumber, h, load, mount, monthISO, pageHead, person, replaceQuery, stat, table } from "../core.js";
 import { departmentFilter, monthInput, shiftMonth } from "../ui.js";
 
 export const page = {
@@ -29,15 +29,15 @@ export const page = {
       load(body, () => api.get("/api/payroll", { month: state.month, departmentId: state.departmentId }), (p) => {
         const noSalary = p.rows.filter((r) => r.monthlySalary === null).length;
         mount(stats,
-          stat("Gross pay", fmtNumber(p.totalGross, 2), fmtMonth(state.month)),
-          stat("Employees", p.rows.length, noSalary ? `${noSalary} without a salary` : "all with a salary"),
-          stat("Overtime", `${fmtHours(p.rows.reduce((a, r) => a + r.overtimeMinutes, 0))} h`, `paid at ×${p.overtimeMultiplier}`),
-          stat("Unpaid days", fmtNumber(p.rows.reduce((a, r) => a + r.absentDays + r.unpaidLeaveDays, 0), 1), "absence + unpaid leave"));
+          stat("Gross pay", fmtNumber(p.totalGross, 2), fmtMonth(state.month), { icon: "money", tone: "green" }),
+          stat("Employees", p.rows.length, noSalary ? `${noSalary} without a salary` : "all with a salary", { icon: "users", tone: "blue" }),
+          stat("Overtime", `${fmtHours(p.rows.reduce((a, r) => a + r.overtimeMinutes, 0))} h`, `paid at ×${p.overtimeMultiplier}`, { icon: "hourglass", tone: "violet" }),
+          stat("Unpaid days", fmtNumber(p.rows.reduce((a, r) => a + r.absentDays + r.unpaidLeaveDays, 0), 1), "absence + unpaid leave", { icon: "xCircle", tone: "red" }));
         return [
           p.complete ? null : h("div", { class: "alert info", style: "margin:12px 16px" },
             "This month is not over yet: days still to come are counted as payable. Run payroll after the month ends."),
           table([
-            { label: "Employee", value: (r) => [h("a", { href: `#/employees/${r.employeeId}` }, r.fullName), h("div", { class: "muted small" }, r.employeeCode)] },
+            { label: "Employee", value: (r) => person(r.fullName, r.employeeCode, `#/employees/${r.employeeId}`) },
             { label: "Department", value: (r) => r.departmentName || "–" },
             { label: "Salary", value: (r) => (r.monthlySalary === null ? h("span", { class: "muted" }, "not set") : fmtNumber(r.monthlySalary, 2)), class: "num" },
             { label: "Working", value: (r) => r.workingDays, class: "num" },

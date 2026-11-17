@@ -1,27 +1,36 @@
-import { api, card, fmtDateTime, h, load, mount, navigate, pageHead, toast } from "../core.js";
+import { api, card, fmtDateTime, h, icon, load, mount, navigate, pageHead, toast } from "../core.js";
+
+const KIND_ICONS = {
+  LEAVE: "leave", CORRECTION: "wrench", DAILY_ABSENCE: "users", TEAM_ABSENCE: "users", LATE_ARRIVAL: "clock",
+  IRREGULARITIES: "alert", REPORT: "report"
+};
+const kindIcon = (kind) => KIND_ICONS[Object.keys(KIND_ICONS).find((k) => kind.startsWith(k))] || "bell";
 
 export const page = {
   title: "Notifications",
   async render(container) {
     const body = h("div");
-    const readAll = h("button", { class: "btn", type: "button", onclick: markAll }, "Mark all as read");
+    const readAll = h("button", { class: "btn", type: "button", onclick: markAll }, icon("check", 16), "Mark all as read");
     const emailNote = h("div");
     mount(container, pageHead("Notifications", readAll), emailNote, card(null, body));
     api.get("/api/notifications/unread").then((r) => {
-      if (!r.emailEnabled) mount(emailNote, h("p", { class: "muted small", style: "margin-top:-8px" }, "Email is not set up, so notifications appear only here."));
+      if (!r.emailEnabled) mount(emailNote, h("p", { class: "muted small", style: "margin:-12px 0 16px" }, "Email is not set up, so notifications appear only here."));
     }).catch(() => {});
     refresh();
 
     function refresh() {
       load(body, () => api.get("/api/notifications"), (rows) => rows.length
         ? h("div", null, rows.map((n) => h("div", {
-            style: `padding:12px 16px;border-bottom:1px solid var(--border);display:grid;gap:4px;cursor:${n.link ? "pointer" : "default"};${n.readAt ? "" : "background:var(--accent-soft)"}`,
-            onclick: () => open(n)
+            class: `notice${n.readAt ? "" : " unread"}`, style: n.link ? "cursor:pointer" : "", onclick: () => open(n)
           },
-          h("div", { style: "display:flex;justify-content:space-between;gap:12px" },
-            h("strong", null, n.title), h("span", { class: "muted small", style: "white-space:nowrap" }, fmtDateTime(n.createdAt))),
-          n.body ? h("div", { class: "muted", style: "white-space:pre-line" }, n.body) : null)))
-        : h("div", { class: "empty" }, "No notifications yet. You will be told here about leave and correction requests, decisions, absences and reports."));
+          h("div", { class: "dot" }, icon(kindIcon(n.kind), 18)),
+          h("div", { style: "display:grid;gap:3px;min-width:0" },
+            h("div", { style: "display:flex;justify-content:space-between;gap:12px" },
+              h("strong", { style: "font-weight:600" }, n.title),
+              h("span", { class: "muted small", style: "white-space:nowrap" }, fmtDateTime(n.createdAt))),
+            n.body ? h("div", { class: "muted", style: "white-space:pre-line" }, n.body) : null))))
+        : h("div", { class: "empty" }, icon("bell", 28),
+            "No notifications yet. You'll be told here about leave and correction requests, decisions, absences and reports."));
     }
 
     async function open(n) {

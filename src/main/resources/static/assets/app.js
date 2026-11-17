@@ -1,6 +1,6 @@
 import {
-  api, ApiError, currentPath, currentQuery, ensureCsrf, h, hasRole, mount, navigate, resolve, route, session,
-  setNotFound, setUnauthorizedHandler, errorBox
+  api, ApiError, avatar, currentPath, currentQuery, ensureCsrf, h, hasRole, icon, mount, navigate, resolve, route,
+  session, setNotFound, setUnauthorizedHandler, errorBox, titleCase
 } from "./core.js";
 import { NAV, registerPages, homePath } from "./pages/index.js";
 
@@ -20,10 +20,23 @@ let shell = null;          // { el, content, nav }
 let renderToken = 0;
 
 // ---------------------------------------------------------------- auth screens
+/** Two-panel sign-in layout: brand story on the left, the form on the right. */
 function authCard(title, intro, formEl) {
-  return h("div", { class: "auth" },
-    h("div", { class: "brand", style: "justify-content:center;padding-bottom:20px" }, LOGO(), "Attendance"),
-    h("div", { class: "card" }, h("div", { class: "card-body" }, h("h2", null, title), h("p", null, intro), formEl)));
+  const point = (name, text) => h("div", null, icon(name, 18), text);
+  return h("div", { class: "auth-screen" },
+    h("section", { class: "auth-brand" },
+      h("div", null,
+        h("div", { class: "brand" }, LOGO(), "Attendance"),
+        h("h1", null, "Attendance, leave and payroll in one place."),
+        h("p", null, "Punches flow in from your ZKTeco devices. Everyone sees what matters to them, and HR stops chasing spreadsheets."),
+        h("div", { class: "auth-points" },
+          point("fingerprint", "Automatic sync from biometric devices"),
+          point("clock", "Late arrivals, overtime and absences worked out for you"),
+          point("leave", "Leave requests and approvals in a few clicks"),
+          point("wallet", "Attendance-based payroll, ready to export"))),
+      h("div", { class: "foot" }, "Secure sign-in · Every change is recorded in the audit log")),
+    h("section", { class: "auth-panel" },
+      h("div", { class: "auth" }, h("h2", null, title), h("p", null, intro), formEl)));
 }
 
 function loginScreen(message) {
@@ -47,7 +60,7 @@ function loginScreen(message) {
       button.disabled = false;
     }
   });
-  mount(root, authCard("Sign in", "Use the account your administrator created for you.", formEl));
+  mount(root, authCard("Welcome back", "Sign in with the account your administrator created for you.", formEl));
   email.focus();
 }
 
@@ -91,14 +104,17 @@ function buildShell() {
     h("div", { class: "brand" }, LOGO(), session.settings?.company_name || "Attendance"),
     nav,
     h("div", { class: "me" },
-      h("strong", null, session.me.displayName),
-      h("span", { class: "muted" }, session.me.email), h("br"),
-      h("a", { href: "#/account", onclick: closeNav }, "My account"), " · ",
-      h("button", { class: "btn link small", type: "button", onclick: logout }, "Sign out")));
+      h("a", { href: "#/account", onclick: closeNav, "aria-label": "My account" }, avatar(session.me.displayName)),
+      h("a", { class: "who", href: "#/account", onclick: closeNav, style: "text-decoration:none" },
+        h("strong", null, session.me.displayName),
+        h("span", { class: "muted" }, titleCase(session.me.role))),
+      h("button", { class: "icon-btn", type: "button", title: "Sign out", "aria-label": "Sign out", onclick: logout }, icon("logout", 18))));
   const topbar = h("header", { class: "topbar" },
     h("button", { class: "icon-btn", type: "button", "aria-label": "Menu",
-                  onclick: () => shellEl.classList.toggle("nav-open") }, "☰"),
+                  onclick: () => shellEl.classList.toggle("nav-open") }, icon("menu", 22)),
+    LOGO(),
     h("strong", null, session.settings?.company_name || "Attendance"));
+  shellEl.addEventListener("click", (e) => { if (e.target === shellEl) closeNav(); });
   mount(shellEl, sidebar, h("div", { style: "min-width:0" }, topbar, content));
   nav.addEventListener("click", (e) => { if (e.target.closest("a")) closeNav(); });
   mount(root, shellEl);
@@ -117,7 +133,7 @@ export function renderNav() {
         href: "#" + i.path,
         class: path === i.path || (i.path !== "/" && path.startsWith(i.path + "/")) ? "active" : "",
         "aria-current": path === i.path ? "page" : null
-      }, i.label, i.badge ? i.badge() : null))];
+      }, icon(i.icon || "dashboard", 18), h("span", { class: "label" }, i.label), i.badge ? i.badge() : null))];
   }));
 }
 

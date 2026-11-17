@@ -80,10 +80,10 @@ export const page = {
         const s = await api.get("/api/sync/status");
         const ok = s.lastRun?.status === "SUCCESS";
         mount(stats,
-          stat("Total punches", s.totalRecords.toLocaleString(), "stored in database"),
-          stat("Latest punch", s.latestPunchAt ? fmtDateTime(s.latestPunchAt) : "None yet", "most recent punch"),
+          stat("Total punches", s.totalRecords.toLocaleString(), "stored in database", { icon: "fingerprint", tone: "blue" }),
+          stat("Latest punch", s.latestPunchAt ? fmtDateTime(s.latestPunchAt) : "None yet", "most recent punch", { icon: "clock", tone: "violet" }),
           stat("Last sync", s.lastRun ? s.lastRun.status : "Never",
-               s.lastRun ? fmtDateTime(s.lastRun.finishedAt || s.lastRun.startedAt) : "waiting for the sync agent"));
+               s.lastRun ? fmtDateTime(s.lastRun.finishedAt || s.lastRun.startedAt) : "waiting for the sync agent", { icon: "sync", tone: s.lastRun ? (ok ? "green" : "red") : "slate" }));
         stats.lastElementChild.querySelector(".value").style.color = s.lastRun ? (ok ? "var(--ok)" : "var(--bad)") : "";
       } catch (e) {
         mount(stats, errorBox(e.message));

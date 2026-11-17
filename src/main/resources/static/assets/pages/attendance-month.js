@@ -11,7 +11,7 @@ export function attendanceMonth(employeeId, initialMonth, { showBalances = true,
 
   function render() {
     const body = h("div");
-    const nav = h("div", { class: "filters", style: "padding:0 0 12px" },
+    const nav = h("div", { class: "filters", style: "padding:0 0 12px;border:0" },
       h("button", { class: "btn", type: "button", "aria-label": "Previous month", onclick: () => go(shiftMonth(month, -1)) }, "‹"),
       monthInput(month, go),
       h("button", { class: "btn", type: "button", "aria-label": "Next month", onclick: () => go(shiftMonth(month, 1)) }, "›"));

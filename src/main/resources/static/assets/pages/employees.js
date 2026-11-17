@@ -1,5 +1,5 @@
 import {
-  api, card, currentQuery, downloadCsv, fmtDate, fmtDateTime, h, hasRole, load, mount, navigate, pageHead, pill,
+  api, card, currentQuery, downloadCsv, fmtDate, fmtDateTime, h, hasRole, load, mount, navigate, pageHead, person, pill,
   replaceQuery, table, tabs
 } from "../core.js";
 import { departmentFilter } from "../ui.js";
@@ -48,11 +48,10 @@ export const page = {
         active: state.status === "all" ? "" : state.status === "active"
       }), (rows) => [
         table([
-          { label: "Name", value: (e) => h("a", { href: `#/employees/${e.id}` }, h("strong", null, e.fullName)) },
+          { label: "Name", value: (e) => person(e.fullName, e.designation, `#/employees/${e.id}`) },
           { label: "Employee ID", value: (e) => e.employeeCode },
           { label: "Device ID", value: (e) => e.deviceUserId || h("span", { class: "muted" }, "not linked") },
           { label: "Department", value: (e) => e.departmentName || "–" },
-          { label: "Designation", value: (e) => e.designation || "–" },
           { label: "Reports to", value: (e) => e.managerName || "–" },
           { label: "Sign-in", value: (e) => (e.userEmail ? pill(e.userRole === "EMPLOYEE" ? "Yes" : e.userRole, "ok") : pill("None", "neutral")) },
           { label: "Status", value: (e) => (e.active ? pill("Active", "ok") : pill("Deactivated", "neutral")) }

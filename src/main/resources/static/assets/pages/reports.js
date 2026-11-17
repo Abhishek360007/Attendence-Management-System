@@ -1,4 +1,4 @@
-import { api, card, currentQuery, downloadCsv, fmtHours, fmtMinutes, fmtNumber, fmtPercent, h, isoDate, load, mount, navigate, pageHead, replaceQuery, table } from "../core.js";
+import { api, card, currentQuery, downloadCsv, fmtHours, fmtMinutes, fmtNumber, fmtPercent, h, isoDate, load, mount, navigate, pageHead, person, replaceQuery, table } from "../core.js";
 import { companyToday, departmentFilter } from "../ui.js";
 
 const SORTS = {
@@ -44,7 +44,7 @@ export const page = {
             s.leaveDays, s.lateDays, s.lateMinutes, s.earlyDays, s.earlyMinutes, s.missingPunchDays, (s.overtimeMinutes / 60).toFixed(2),
             s.attendancePercent ?? "", onTime(s) ?? ""]));
         return table([
-          { label: "Employee", value: (r) => r.employee.fullName },
+          { label: "Employee", value: (r) => person(r.employee.fullName, r.employee.designation) },
           { label: "Department", value: (r) => r.employee.departmentName || "–" },
           { label: "Attendance", value: (r) => fmtPercent(r.summary.attendancePercent), class: "num" },
           { label: "On time", value: (r) => fmtPercent(onTime(r.summary)), class: "num" },

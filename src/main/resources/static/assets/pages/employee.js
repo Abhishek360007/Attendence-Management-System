@@ -1,5 +1,5 @@
 import {
-  api, card, currentQuery, fmtDate, fmtDateTime, fmtNumber, h, hasRole, load, mount, pageHead, pill, replaceQuery,
+  api, avatar, card, currentQuery, fmtDate, fmtDateTime, fmtNumber, h, hasRole, load, mount, pageHead, pill, replaceQuery,
   table, tabs, titleCase
 } from "../core.js";
 import { requestPill } from "../ui.js";
@@ -36,7 +36,11 @@ export const page = {
       };
       setTimeout(show);
       return [
-        pageHead(e.fullName, ...actions),
+        h("div", { class: "page-head" },
+          h("div", { class: "profile-head" }, avatar(e.fullName, "lg"),
+            h("div", null, h("h1", null, e.fullName),
+              h("div", { class: "muted" }, [e.designation, e.departmentName, e.employeeCode].filter(Boolean).join(" · ")))),
+          h("div", { class: "actions" }, actions)),
         !e.active ? h("div", { class: "alert info" }, `Deactivated${e.leftOn ? ", left on " + fmtDate(e.leftOn) : ""}.`) : null,
         !e.deviceUserId ? h("div", { class: "alert info" }, "No device user ID: punches from the ZKTeco devices are not linked to this employee. Edit the profile to add it.") : null,
         card(null, h("div", { class: "card-body form-grid" },

@@ -1,6 +1,6 @@
 import {
   api, card, confirmDialog, currentQuery, fmtDate, fmtDateTime, fmtNumber, formModal, h, hasRole, load, mount,
-  pageHead, replaceQuery, session, table, tabs, toast
+  pageHead, person, replaceQuery, session, table, tabs, toast
 } from "../core.js";
 import { balanceTable, lookup, requestPill } from "../ui.js";
 
@@ -83,7 +83,7 @@ export const page = {
       }
       const scope = tab;
       load(body, () => api.get("/api/leave/requests", { scope }), (rows) => table([
-        scope !== "mine" ? { label: "Employee", value: (r) => h("a", { href: `#/employees/${r.employeeId}` }, r.employeeName) } : null,
+        scope !== "mine" ? { label: "Employee", value: (r) => person(r.employeeName, r.departmentName, `#/employees/${r.employeeId}`) } : null,
         { label: "Type", value: (r) => r.leaveTypeName + (r.paid ? "" : " (unpaid)") },
         { label: "From", value: (r) => fmtDate(r.startDate) },
         { label: "To", value: (r) => fmtDate(r.endDate) },

@@ -1,6 +1,6 @@
 import {
   api, card, confirmDialog, currentQuery, fmtDateTime, formModal, h, hasRole, load, mount, pageHead, replaceQuery,
-  session, table, tabs, titleCase, toast
+  person, session, table, tabs, titleCase, toast
 } from "../core.js";
 import { companyToday, requestPill } from "../ui.js";
 
@@ -118,7 +118,7 @@ export const page = {
       replaceQuery({ tab });
       mount(tabBar, tabs(available, tab, (k) => { tab = k; show(); }));
       load(body, () => api.get("/api/corrections", { scope: tab }), (rows) => table([
-        tab !== "mine" ? { label: "Employee", value: (c) => h("a", { href: `#/employees/${c.employeeId}` }, c.employeeName) } : null,
+        tab !== "mine" ? { label: "Employee", value: (c) => person(c.employeeName, c.employeeCode, `#/employees/${c.employeeId}`) } : null,
         { label: "Change", value: (c) => describe(c) },
         { label: "Reason", value: (c) => c.reason, class: "wrap" },
         { label: "Requested", value: (c) => h("span", { class: "small" }, `${c.requestedByName || ""}, ${fmtDateTime(c.createdAt)}`) },

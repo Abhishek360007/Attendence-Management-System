@@ -38,11 +38,11 @@ export function dayNote(d) {
 /** Stat tiles for a PeriodSummary. */
 export function summaryStats(s) {
   return h("div", { class: "stats" },
-    stat("Attendance", fmtPercent(s.attendancePercent), `${fmtNumber(s.presentDays, s.presentDays % 1 ? 1 : 0)} of ${s.workingDays - s.leaveDays} expected days`),
-    stat("Absent", fmtNumber(s.absentDays, s.absentDays % 1 ? 1 : 0), s.halfDays ? `${s.halfDays} half day(s)` : "days"),
-    stat("Late arrivals", s.lateDays, s.lateMinutes ? `${fmtMinutes(s.lateMinutes)} in total` : "on time"),
-    stat("Leave", s.leaveDays, s.unpaidLeaveDays ? `${s.unpaidLeaveDays} unpaid` : "days"),
-    stat("Overtime", `${fmtHours(s.overtimeMinutes)} h`, s.earlyDays ? `${s.earlyDays} early departure(s)` : "hours"));
+    stat("Attendance", fmtPercent(s.attendancePercent), `${fmtNumber(s.presentDays, s.presentDays % 1 ? 1 : 0)} of ${s.workingDays - s.leaveDays} expected days`, { icon: "check", tone: "green" }),
+    stat("Absent", fmtNumber(s.absentDays, s.absentDays % 1 ? 1 : 0), s.halfDays ? `${s.halfDays} half day(s)` : "days", { icon: "xCircle", tone: "red" }),
+    stat("Late arrivals", s.lateDays, s.lateMinutes ? `${fmtMinutes(s.lateMinutes)} in total` : "always on time", { icon: "clock", tone: "amber" }),
+    stat("Leave", s.leaveDays, s.unpaidLeaveDays ? `${s.unpaidLeaveDays} unpaid` : "days", { icon: "plane", tone: "blue" }),
+    stat("Overtime", `${fmtHours(s.overtimeMinutes)} h`, s.earlyDays ? `${s.earlyDays} early departure(s)` : "extra hours", { icon: "hourglass", tone: "violet" }));
 }
 
 /** Month calendar of DayRecords (days outside employment are blank). */

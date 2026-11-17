@@ -1,4 +1,4 @@
-import { api, card, currentQuery, downloadCsv, fmtMinutes, fmtTime, h, load, mount, navigate, pageHead, replaceQuery, stat, table } from "../core.js";
+import { api, card, currentQuery, downloadCsv, fmtMinutes, fmtTime, h, load, mount, navigate, pageHead, person, replaceQuery, stat, table } from "../core.js";
 import { companyToday, dayFlags, dayNote, departmentFilter, STATUS, statusPill } from "../ui.js";
 
 export const page = {
@@ -31,11 +31,11 @@ export const page = {
       load(body, () => api.get("/api/attendance/register", { date: state.date, departmentId: state.departmentId }), (rows) => {
         const count = (pred) => rows.filter(pred).length;
         mount(stats,
-          stat("Present", count((r) => r.day.status === "PRESENT" || r.day.status === "HALF_DAY"), `of ${rows.length}`),
-          stat("Late", count((r) => r.day.lateMinutes > 0)),
-          stat("Absent", count((r) => r.day.status === "ABSENT")),
-          stat("On leave", count((r) => r.day.status === "LEAVE")),
-          stat("Irregular", count(issue), "missing punch, early or half day"));
+          stat("Present", count((r) => r.day.status === "PRESENT" || r.day.status === "HALF_DAY"), `of ${rows.length}`, { icon: "check", tone: "green" }),
+          stat("Late", count((r) => r.day.lateMinutes > 0), "after grace time", { icon: "clock", tone: "amber" }),
+          stat("Absent", count((r) => r.day.status === "ABSENT"), "no punch, no leave", { icon: "xCircle", tone: "red" }),
+          stat("On leave", count((r) => r.day.status === "LEAVE"), "approved", { icon: "plane", tone: "blue" }),
+          stat("Irregular", count(issue), "missing punch, early or half day", { icon: "alert", tone: "violet" }));
         const shown = rows.filter((r) => {
           switch (state.status) {
             case "ABSENT": return r.day.status === "ABSENT";
@@ -52,7 +52,7 @@ export const page = {
             r.day.firstIn ? fmtTime(r.day.firstIn) : "", r.day.lastOut ? fmtTime(r.day.lastOut) : "", r.day.workedMinutes,
             r.day.lateMinutes, r.day.earlyMinutes, r.day.overtimeMinutes, r.day.missingOut ? "yes" : "", dayNote(r.day) || ""]));
         return table([
-          { label: "Employee", value: (r) => h("a", { href: `#/employees/${r.employee.id}` }, r.employee.fullName) },
+          { label: "Employee", value: (r) => person(r.employee.fullName, r.employee.designation, `#/employees/${r.employee.id}`) },
           { label: "Department", value: (r) => r.employee.departmentName || "–" },
           { label: "Status", value: (r) => statusPill(r.day.status) },
           { label: "Shift", value: (r) => `${fmtTime(r.day.scheduledStart)}–${fmtTime(r.day.scheduledEnd)}`, class: "muted" },
