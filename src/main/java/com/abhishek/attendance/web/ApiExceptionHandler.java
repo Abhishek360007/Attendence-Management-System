@@ -30,6 +30,13 @@ public class ApiExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail.isEmpty() ? "Invalid request" : detail);
     }
 
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ProblemDetail unreadable(org.springframework.http.converter.HttpMessageNotReadableException e) {
+        String cause = e.getMostSpecificCause().getMessage();
+        if (cause != null && cause.length() > 200) cause = cause.substring(0, 200) + "...";
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "The request could not be read: " + cause);
+    }
+
     @ExceptionHandler(NotFoundException.class)
     public ProblemDetail notFound(NotFoundException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());

@@ -42,6 +42,7 @@ public class AttendanceService {
 
         Map<String, List<AttendanceRecord>> grouped = new LinkedHashMap<>();
         for (AttendanceRecord r : records) {
+            if (r.voided()) continue; // replaced or removed by a correction
             String key = r.employeeId() + "|" + r.checkTime().toLocalDate();
             grouped.computeIfAbsent(key, k -> new ArrayList<>()).add(r);
         }

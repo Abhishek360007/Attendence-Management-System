@@ -14,6 +14,6 @@ public record DevicePunch(
         Integer sensorId) {
 
     public AttendanceRecord toRecord() {
-        return new AttendanceRecord(null, badgeNumber, name, checkTime, checkType, sensorId, autoIncrement);
+        return AttendanceRecord.fromDevice(badgeNumber, name, checkTime, checkType, sensorId, autoIncrement);
     }
 }

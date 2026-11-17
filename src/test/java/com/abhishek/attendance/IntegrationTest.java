@@ -38,9 +38,13 @@ public abstract class IntegrationTest {
     @Autowired
     private LoginRateLimiter loginRateLimiter;
 
+    @Autowired
+    protected com.abhishek.attendance.settings.SettingsService settingsService;
+
     @BeforeEach
     void emptyDatabase() {
         loginRateLimiter.reset();
+        settingsService.evictCache();
         List<String> tables = jdbc.queryForList("""
                 SELECT tablename FROM pg_tables
                 WHERE schemaname = 'public' AND tablename <> 'flyway_schema_history'
@@ -48,6 +52,14 @@ public abstract class IntegrationTest {
         if (!tables.isEmpty()) {
             jdbc.execute("TRUNCATE " + String.join(", ", tables) + " RESTART IDENTITY CASCADE");
         }
+        // Rows the migrations seed.
+        jdbc.update("INSERT INTO company_setting (key, value) VALUES ('company_name', 'My Company'), ('timezone', 'Asia/Kolkata')");
+        jdbc.update("""
+                INSERT INTO work_schedule (name, start_time, end_time, weekly_offs, is_default)
+                VALUES ('General shift', '09:00', '18:00', 'SUNDAY', TRUE)""");
+        jdbc.update("""
+                INSERT INTO leave_type (name, paid, annual_quota) VALUES
+                ('Casual leave', TRUE, 12), ('Sick leave', TRUE, 12), ('Earned leave', TRUE, 15), ('Unpaid leave', FALSE, NULL)""");
     }
 
     protected Browser browser() {

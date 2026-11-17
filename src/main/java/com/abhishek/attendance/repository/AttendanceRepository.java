@@ -22,10 +22,12 @@ public class AttendanceRepository {
             rs.getTimestamp("check_time").toLocalDateTime(),
             rs.getString("check_type"),
             (Integer) rs.getObject("device_id", Integer.class),
-            rs.getLong("source_id"));
+            rs.getLong("source_id"),
+            rs.getString("source"),
+            rs.getBoolean("voided"));
 
     private static final String SELECT = """
-            SELECT id, employee_id, employee_name, check_time, check_type, device_id, source_id
+            SELECT id, employee_id, employee_name, check_time, check_type, device_id, source_id, source, voided
             FROM attendance_record
             """;
 
@@ -71,7 +73,7 @@ public class AttendanceRepository {
     }
 
     public LocalDateTime maxCheckTime() {
-        Timestamp max = jdbc.queryForObject("SELECT MAX(check_time) FROM attendance_record", Timestamp.class);
+        Timestamp max = jdbc.queryForObject("SELECT MAX(check_time) FROM attendance_record WHERE source = 'DEVICE'", Timestamp.class);
         return max == null ? null : max.toLocalDateTime();
     }
 
@@ -89,7 +91,7 @@ public class AttendanceRepository {
     }
 
     public long maxSourceId() {
-        Long max = jdbc.queryForObject("SELECT MAX(source_id) FROM attendance_record", Long.class);
+        Long max = jdbc.queryForObject("SELECT MAX(source_id) FROM attendance_record WHERE source = 'DEVICE'", Long.class);
         return max == null ? 0L : max;
     }
 
